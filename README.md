@@ -41,6 +41,9 @@ Install all dependencies
 - LogLevel and LogPath if left empty is already automatically assigned in coraza.conf
 - <strong> ParanoidLevel must be hard configured at crs-setup.conf </strong>
 
+```go
+
+type Config struct {
 
 	// WAF mode
 	DetectionMode bool `json:"detection_mode" ` // log matched request
@@ -62,6 +65,12 @@ Install all dependencies
 	SessionFixationProtect bool `json:"session_fixation_protect"` // enable session fixation protection
 	JavaProtect            bool `json:"java_protect"`             // enable Java protection
 	WebShellProtect        bool `json:"webshell_protect"`         // enable web shell protection
+}
+
+
+```
+
+
 
 
 ## Benchmark 
