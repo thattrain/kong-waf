@@ -1,0 +1,29 @@
+package main
+
+// Config The value in each field of this struct is not validate such as plugin schema written in Lua
+// any invalid value is ignored, empty value is default value of each data type, eg: bool -> false.
+//
+// LogLevel and LogPath if left empty is already automatically assigned in coraza.conf
+type Config struct {
+
+	// WAF mode
+	DetectionMode bool `json:"detection_mode" ` // log matched request
+	EnforceMode   bool `json:"enforce_mode"`    // block matched request
+	EnableAll     bool `json:"enable_all"`      //	enable all protection strategy
+
+	// logging configuration if DetectionMode is true
+	LogPath  string `json:"log_path"`  // debug log path (consider to create a separate log file for each scope that this plugin apply)
+	LogLevel int    `json:"log_level"` // default to Info (3), value 1-9: Error(1), Warn(2), Info(3), Debug(4-8), Trace(9)
+
+	// protection strategy when EnableAll is false
+	ScannerDetection       bool `json:"scanner_detection"`        // enable scanner detection
+	MultipartProtect       bool `json:"multipart_protect"`        // enable multipart protection
+	RceProtect             bool `json:"rce_protect"`              // enable remote code execution protect
+	PhpProtect             bool `json:"php_protect"`              // enable PHP protection
+	GenericProtection      bool `json:"generic_protection"`       // enable generic web protection
+	XssProtect             bool `json:"xss_protect"`              // enable XSS protection
+	SqlInjectionProtect    bool `json:"sql_injection_protect"`    // enable SQl injection protection
+	SessionFixationProtect bool `json:"session_fixation_protect"` // enable session fixation protection
+	JavaProtect            bool `json:"java_protect"`             // enable Java protection
+	WebShellProtect        bool `json:"webshell_protect"`         // enable web shell protection
+}
