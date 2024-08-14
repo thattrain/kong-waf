@@ -6,7 +6,6 @@ import (
 	"github.com/Kong/go-pdk"
 	"github.com/Kong/go-pdk/server"
 	"github.com/corazawaf/coraza/v3"
-	"github.com/corazawaf/coraza/v3/types"
 	"log"
 	"sync"
 )
@@ -15,7 +14,7 @@ import (
 
 //go:embed coraza.conf crs-setup.conf rules
 var embedFS embed.FS
-var wafMap map[Config]coraza.WAF = make(map[Config]coraza.WAF)
+var wafMap = make(map[Config]coraza.WAF)
 var wafLock sync.Mutex
 
 const (
@@ -65,71 +64,38 @@ func (conf Config) Access(kong *pdk.PDK) {
 	defer wafLock.Unlock()
 
 	// get waf instance base on Config struct
-	waf, exist := wafMap[conf]
+	_, exist := wafMap[conf]
 	if exist {
 		kong.Log.Debug(fmt.Printf("WAF instance with config %v exist - Not create again", conf))
-		// transaction handling
-		var tx types.Transaction
-		requestId, err := kong.Request.GetHeader("X-Kong-Request-Id")
-		if err != nil {
-			tx = waf.NewTransaction()
-		} else {
-			//map Kong requestId with Coraza requestId
-			tx = waf.NewTransactionWithID(requestId)
-		}
-
-		defer func() {
-			tx.ProcessLogging()
-			tx.Close()
-		}()
-
-		interruption, requestErr := processRequest(tx, kong)
-		if requestErr != nil {
-			kong.Response.ExitStatus(403)
-			kong.Response.Exit(403, []byte("Error in WAF, check your security rules."), nil)
-		}
-
-		if interruption != nil {
-			interruptionType := interruption.Action
-			interruptionId := interruption.RuleID
-			response := fmt.Sprintf("Request terminated by Kong WAF - Action: %s - RuleId: %d", interruptionType, interruptionId)
-			kong.Response.Exit(403, []byte(response), nil)
-		}
 	} else {
-		wafInstance, err := createWaf(conf)
+		wafInstance, err := createWaf(conf, kong)
 		if err != nil {
-			kong.Log.Err("Error while creating kong WAF instance", err)
+			kong.Log.Err("Error while creating kong WAF instance \n", err)
 			panic(err)
 		}
 		wafMap[conf] = wafInstance
 		kong.Log.Debug(fmt.Sprintf("Create WAF instance created with config %v", conf))
-		// transaction handling
-		var tx types.Transaction
-		requestId, err := kong.Request.GetHeader("X-Kong-Request-Id")
-		if err != nil {
-			tx = wafInstance.NewTransaction()
-		} else {
-			//map Kong requestId with Coraza requestId
-			tx = wafInstance.NewTransactionWithID(requestId)
-		}
+	}
+	waf := wafMap[conf]
 
-		defer func() {
-			tx.ProcessLogging()
-			tx.Close()
-		}()
+	// transaction handling
+	tx := waf.NewTransaction()
+	defer func() {
+		tx.ProcessLogging()
+		tx.Close()
+	}()
 
-		interruption, requestErr := processRequest(tx, kong)
-		if requestErr != nil {
-			kong.Response.ExitStatus(403)
-			kong.Response.Exit(403, []byte("Error in WAF, check your security rules."), nil)
-		}
+	interruption, requestErr := processRequest(tx, kong)
+	if requestErr != nil {
+		kong.Response.ExitStatus(403)
+		kong.Response.Exit(403, []byte("Error in WAF, check your security rules."), nil)
+	}
 
-		if interruption != nil {
-			interruptionType := interruption.Action
-			interruptionId := interruption.RuleID
-			response := fmt.Sprintf("Request terminated by Kong WAF - Action: %s - RuleId: %d", interruptionType, interruptionId)
-			kong.Response.Exit(403, []byte(response), nil)
-		}
+	if interruption != nil {
+		interruptionType := interruption.Action
+		interruptionId := interruption.RuleID
+		response := fmt.Sprintf("Request terminated by Kong WAF - Action: %s - RuleId: %d", interruptionType, interruptionId)
+		kong.Response.Exit(403, []byte(response), nil)
 	}
 
 }

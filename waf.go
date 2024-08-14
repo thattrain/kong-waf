@@ -22,22 +22,25 @@ const (
 	secDebugLogLevelRegex = `(?m)(^(?<indent>\s*)?(?<key>SecDebugLogLevel\s+)(?<value>[1-9])$)`
 )
 
-func createWafConfig(conf Config) coraza.WAFConfig {
+func createWafConfig(conf Config, kong *pdk.PDK) coraza.WAFConfig {
 
 	corazaRules := loadFile(corazaConf)
 	secEngineRegex := regexp.MustCompile(secRuleEngineRegex)
 	if conf.DetectionMode {
+		kong.Log.Debug("Creat WAF instance with SecRuleEngine DetectionOnly")
 		corazaRules = secEngineRegex.ReplaceAllString(corazaRules, fmt.Sprintf("${index}${key}%s", secRuleEngineValueDetectOnly))
 	} else if conf.EnforceMode {
+		kong.Log.Info("Creat WAF instance with SecRuleEngine On")
 		corazaRules = secEngineRegex.ReplaceAllString(corazaRules, fmt.Sprintf("${index}${key}%s", secRuleEngineEnforce))
 	} else {
+		kong.Log.Info("Creat WAF instance with SecRuleEngine Off")
 		corazaRules = secEngineRegex.ReplaceAllString(corazaRules, fmt.Sprintf("${index}${key}%s", secRuleEngineOff))
 	}
 
 	if conf.LogPath != "" {
 		err := createFile(conf.LogPath)
 		if err != nil {
-			fmt.Printf("Error creating log file: %v", err)
+			kong.Log.Warn(fmt.Printf("Error creating SecDebugLog file: %v", err))
 		} else {
 			secDebugLogPathRegex := regexp.MustCompile(secDebugLogPathRegex)
 			corazaRules = secDebugLogPathRegex.ReplaceAllString(corazaRules, fmt.Sprintf("${index}${key}%s", conf.LogPath))
@@ -49,8 +52,6 @@ func createWafConfig(conf Config) coraza.WAFConfig {
 		corazaRules = secDebugLogLevelRegex.ReplaceAllString(corazaRules, fmt.Sprintf("${index}${key}%d", conf.LogLevel))
 	}
 
-	//fmt.Printf("newCorazaRules: %v\n", corazaRules)
-
 	// order of directives must be in correct order in compile time
 	wafConfig := coraza.NewWAFConfig().
 		WithRootFS(embedFS).
@@ -59,40 +60,50 @@ func createWafConfig(conf Config) coraza.WAFConfig {
 		WithErrorCallback(logWafError)
 
 	if conf.EnableAll {
-		fmt.Println("Create WAF instance with all rules enable")
+		kong.Log.Info("Create WAF instance with all rules enable")
 		wafConfig = wafConfig.WithDirectivesFromFile(coreRules)
 	} else {
 		// order of directives must be in correct order in compile time
 		// init core rule set
 		wafConfig = wafConfig.WithDirectivesFromFile(csrInitRule)
 		if conf.ScannerDetection {
+			kong.Log.Info("Create WAF instance with scanner detection rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(scannerDetectionRules)
 		}
 		if conf.MultipartProtect {
+			kong.Log.Info("Create WAF instance with multipart protect rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(multipartRules)
 		}
 		if conf.PhpProtect {
+			kong.Log.Info("Create WAF instance with PHP protect rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(phpRules)
 		}
 		if conf.RceProtect {
+			kong.Log.Info("Create WAF instance with RCE protect rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(rceRules)
 		}
 		if conf.GenericProtection {
+			kong.Log.Info("Create WAF instance with generic protect rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(genericRules)
 		}
 		if conf.XssProtect {
+			kong.Log.Info("Create WAF instance with XSS protect rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(xssRules)
 		}
 		if conf.SqlInjectionProtect {
+			kong.Log.Info("Create WAF instance with SQL Injection protect rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(sqlInjectionRules)
 		}
 		if conf.SessionFixationProtect {
+			kong.Log.Info("Create WAF instance with session fixation protect rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(sessionFixationRules)
 		}
 		if conf.JavaProtect {
+			kong.Log.Info("Create WAF instance with Java protect rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(javaRules)
 		}
 		if conf.WebShellProtect {
+			kong.Log.Info("Create WAF instance with web shell protect rules enable")
 			wafConfig = wafConfig.WithDirectivesFromFile(webShellRules)
 		}
 
@@ -104,8 +115,8 @@ func createWafConfig(conf Config) coraza.WAFConfig {
 	return wafConfig
 }
 
-func createWaf(conf Config) (coraza.WAF, error) {
-	config := createWafConfig(conf)
+func createWaf(conf Config, kong *pdk.PDK) (coraza.WAF, error) {
+	config := createWafConfig(conf, kong)
 	waf, err := coraza.NewWAF(config)
 	if err != nil {
 		panic(err)
@@ -143,7 +154,7 @@ func processRequest(tx types.Transaction, kong *pdk.PDK) (*types.Interruption, e
 
 	in := tx.ProcessRequestHeaders()
 	if in != nil {
-		fmt.Printf("Transaction was interrupted with status %d\n", in.Status)
+		kong.Log.Warn("Transaction was interrupted with status %d\n", in.Status)
 		return in, nil
 	}
 

@@ -8,8 +8,9 @@ Key feature:
 * 🔥 **Security** -  Coraza runs the [OWASP Core Rule Set (CRS)](https://coreruleset.org) **v4** to protect your web applications from a wide range of attacks, including the OWASP Top Ten, with a minimum of false alerts. CRS protects from many common attack categories including: SQL Injection (SQLi), Cross Site Scripting (XSS), PHP & Java Code Injection, HTTPoxy, Shellshock, Scripting/Scanner/Bot Detection & Metadata & Error Leakages. Note that older versions of the CRS are not compatible.
 * **Dynamic configuration** - Kong-waf is dynamically through Kong admin API.
 * **Compatibility** - Compatible with all Kong deployment topologies: hybrid, traditional and DB less.
+* **Core rule set version: 4.5.0**
+* **Kong gateway version: 3.7.1**
 
-Core rule set version: 4.5.0
 
 ## Build source
 Install all dependencies
