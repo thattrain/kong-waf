@@ -72,6 +72,49 @@ type Config struct {
 ```
 
 
+## Test with Go-FTW - Framework for Testing WAFs in Go!
+
+Prerequisite:
+- Active Kong gateway and Kong proxy.
+- A backend service protected by Kong-WAF plugin.
+- [Go-FTW](https://github.com/coreruleset/go-ftw) must be installed, checkout their documentation for installation and detail testing configuration.
+- Using test rule reference from [Coreruleset](https://github.com/coreruleset/coreruleset), test rule should be compatible with CRS version using in Kong-WAF setup.
+
+Test command: 
+
+```bash
+$HOME/go/bin/go-ftw run --config .ftw.kong-waf.yaml -d ../coreruleset/tests/regression/tests/
+```
+
+Result:
+
+```bash
+🛠️ Starting tests!
+🚀 Running go-ftw!
+👉 executing tests in file
+	running 911100-1: ✔ passed in 16.763042ms (RTT 63.269542ms)
+	running 911100-2: ✔ passed in 17.965375ms (RTT 67.659042ms)
+	running 911100-3: ✔ passed in 6.677042ms (RTT 56.261583ms)
+	running 911100-4: ✔ passed in 3.709167ms (RTT 52.710875ms)
+	running 911100-5: ✔ passed in 3.581125ms (RTT 53.355167ms)
+	running 911100-6: ✔ passed in 3.377417ms (RTT 53.159333ms)
+	running 911100-7: ✔ passed in 3.73925ms (RTT 53.485833ms)
+	running 911100-8: ✔ passed in 2.243917ms (RTT 51.917583ms)
+...
+👉 executing tests in file
+	running 980170-1: ✔ passed in 1.942667ms (RTT 51.762083ms)
+	running 980170-2: ✔ passed in 1.686083ms (RTT 51.464917ms)
+	running 980170-3: ✔ passed in 2.215792ms (RTT 52.041292ms)
+➕ run 3845 total tests in 10.577154489s
+⏭ skipped 0 tests
+👎 8 test(s) failed to run: ["920100-4" "920100-8" "920181-1" "920270-4" "920272-5" "920274-1" "920610-2" "920620-1"]
+Error: failed 8 tests
+```
+
+
+
+
+
 
 
 ## Benchmark 
