@@ -3,7 +3,7 @@ package main
 // Config The value in each field of this struct is not validate such as plugin schema written in Lua
 // any invalid value is ignored, empty value is default value of each data type, eg: bool -> false.
 //
-// LogLevel and LogPath if left empty is already automatically assigned in coraza.conf
+// LogLevel and SecDebugLogPath if left empty is already automatically assigned in coraza.conf
 type Config struct {
 
 	// WAF mode
@@ -12,8 +12,9 @@ type Config struct {
 	EnableAll     bool `json:"enable_all"`      //	enable all protection strategy
 
 	// logging configuration if DetectionMode is true
-	LogPath  string `json:"log_path"`  // debug log path (consider to create a separate log file for each scope that this plugin apply)
-	LogLevel int    `json:"log_level"` // default to Info (3), value 1-9: Error(1), Warn(2), Info(3), Debug(4-8), Trace(9)
+	SecDebugLogPath string `json:"debug_log_path"` // debug log path
+	LogLevel        int    `json:"log_level"`      // default to Info (3), value 1-9: Error(1), Warn(2), Info(3), Debug(4-8), Trace(9)
+	SecAuditLogPath string `json:"audit_log_path"` // audit log path
 
 	// protection strategy when EnableAll is false
 	ScannerDetection       bool `json:"scanner_detection"`        // enable scanner detection

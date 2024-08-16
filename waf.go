@@ -20,6 +20,7 @@ const (
 	//value of SecRuleEngine reference from: https://coraza.io/docs/seclang/directives/#secdebuglog
 	secDebugLogPathRegex  = `(?m)(^(?<indent>\s*)?(?<key>SecDebugLog\s+)(?<value>.*)$)`
 	secDebugLogLevelRegex = `(?m)(^(?<indent>\s*)?(?<key>SecDebugLogLevel\s+)(?<value>[1-9])$)`
+	secAuditLogPathRegex  = `(?m)(^(?<indent>\s*)?(?<key>SecAuditLog\s+)(?<value>.*)$)`
 )
 
 func createWafConfig(conf Config, kong *pdk.PDK) coraza.WAFConfig {
@@ -37,13 +38,23 @@ func createWafConfig(conf Config, kong *pdk.PDK) coraza.WAFConfig {
 		corazaRules = secEngineRegex.ReplaceAllString(corazaRules, fmt.Sprintf("${index}${key}%s", secRuleEngineOff))
 	}
 
-	if conf.LogPath != "" {
-		err := createFile(conf.LogPath)
+	if conf.SecDebugLogPath != "" {
+		err := createFile(conf.SecDebugLogPath)
 		if err != nil {
-			kong.Log.Warn(fmt.Printf("Error creating SecDebugLog file: %v", err))
+			kong.Log.Err(fmt.Printf("Error creating SecDebugLog file: %v", err))
 		} else {
 			secDebugLogPathRegex := regexp.MustCompile(secDebugLogPathRegex)
-			corazaRules = secDebugLogPathRegex.ReplaceAllString(corazaRules, fmt.Sprintf("${index}${key}%s", conf.LogPath))
+			corazaRules = secDebugLogPathRegex.ReplaceAllString(corazaRules, fmt.Sprintf("${index}${key}%s", conf.SecDebugLogPath))
+		}
+	}
+
+	if conf.SecAuditLogPath != "" {
+		err := createFile(conf.SecAuditLogPath)
+		if err != nil {
+			kong.Log.Err(fmt.Printf("Error creating SecAuditLog file: %v", err))
+		} else {
+			secAuditLogPathRegex := regexp.MustCompile(secAuditLogPathRegex)
+			corazaRules = secAuditLogPathRegex.ReplaceAllString(corazaRules, fmt.Sprintf("${index}${key}%s", conf.SecAuditLogPath))
 		}
 	}
 
@@ -164,5 +175,5 @@ func processRequest(tx types.Transaction, kong *pdk.PDK) (*types.Interruption, e
 // decide what to do when a request match
 func logWafError(error types.MatchedRule) {
 	msg := error.ErrorLog()
-	fmt.Printf("[logError][%s] %s\n", error.Rule().Severity(), msg)
+	fmt.Printf("RULE_MATCHED|%s|%s\n", error.Rule().Severity(), msg)
 }

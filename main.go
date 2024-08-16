@@ -66,7 +66,7 @@ func (conf Config) Access(kong *pdk.PDK) {
 	// get waf instance base on Config struct
 	_, exist := wafMap[conf]
 	if exist {
-		kong.Log.Debug(fmt.Printf("WAF instance with config %v exist - Not create again", conf))
+		kong.Log.Debug(fmt.Printf("WAF instance with config %v exist - Not create again \n", conf))
 	} else {
 		wafInstance, err := createWaf(conf, kong)
 		if err != nil {
@@ -74,7 +74,7 @@ func (conf Config) Access(kong *pdk.PDK) {
 			panic(err)
 		}
 		wafMap[conf] = wafInstance
-		kong.Log.Debug(fmt.Sprintf("Create WAF instance created with config %v", conf))
+		kong.Log.Debug(fmt.Sprintf("Create WAF instance created with config %v \n", conf))
 	}
 	waf := wafMap[conf]
 
