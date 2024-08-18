@@ -152,9 +152,9 @@ func processRequest(tx types.Transaction, kong *pdk.PDK) (*types.Interruption, e
 	tx.ProcessURI(url, method, fmt.Sprintf("%.1f", httpVersion))
 	headers, _ := kong.Request.GetHeaders(-1)
 
-	for k, vr := range headers {
-		for _, v := range vr {
-			tx.AddRequestHeader(k, v)
+	for key, value := range headers {
+		for _, v := range value {
+			tx.AddRequestHeader(key, v)
 		}
 	}
 
@@ -163,10 +163,10 @@ func processRequest(tx types.Transaction, kong *pdk.PDK) (*types.Interruption, e
 		tx.SetServerName(host)
 	}
 
-	in := tx.ProcessRequestHeaders()
-	if in != nil {
-		kong.Log.Warn("Transaction was interrupted with status %d\n", in.Status)
-		return in, nil
+	headerInterruption := tx.ProcessRequestHeaders()
+	if headerInterruption != nil {
+		kong.Log.Warn("Transaction was interrupted with status %d\n", headerInterruption.Status)
+		return headerInterruption, nil
 	}
 
 	return tx.ProcessRequestBody()

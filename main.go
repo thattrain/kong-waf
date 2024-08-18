@@ -86,6 +86,10 @@ func (conf Config) Access(kong *pdk.PDK) {
 	}()
 
 	interruption, requestErr := processRequest(tx, kong)
+	transactionId := tx.ID()
+	tx.AddRequestHeader("X-Kong-WAF-Request-Id", transactionId)
+	kong.Response.SetHeader("X-Kong-WAF-Request-Id", transactionId)
+
 	if requestErr != nil {
 		kong.Response.ExitStatus(403)
 		kong.Response.Exit(403, []byte("Error in WAF, check your security rules."), nil)
@@ -94,7 +98,7 @@ func (conf Config) Access(kong *pdk.PDK) {
 	if interruption != nil {
 		interruptionType := interruption.Action
 		interruptionId := interruption.RuleID
-		response := fmt.Sprintf("Request terminated by Kong WAF - Action: %s - RuleId: %d", interruptionType, interruptionId)
+		response := fmt.Sprintf("Request terminated by Kong WAF - Action: %s - RuleId: %d - TransactionId: %s", interruptionType, interruptionId, transactionId)
 		kong.Response.Exit(403, []byte(response), nil)
 	}
 

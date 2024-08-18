@@ -9,14 +9,14 @@ type Config struct {
 	// WAF mode
 	DetectionMode bool `json:"detection_mode" ` // log matched request
 	EnforceMode   bool `json:"enforce_mode"`    // block matched request
-	EnableAll     bool `json:"enable_all"`      //	enable all protection strategy
 
-	// logging configuration if DetectionMode is true
+	// logging configuration
 	SecDebugLogPath string `json:"debug_log_path"` // debug log path
 	LogLevel        int    `json:"log_level"`      // default to Info (3), value 1-9: Error(1), Warn(2), Info(3), Debug(4-8), Trace(9)
-	SecAuditLogPath string `json:"audit_log_path"` // audit log path
+	SecAuditLogPath string `json:"audit_log_path"` // audit log path, SecAuditLogParts is hard coded to 'ABIJDEFHKZ' which record everything about the transaction
 
 	// protection strategy when EnableAll is false
+	EnableAll              bool `json:"enable_all"`               // enable all protection strategy
 	ScannerDetection       bool `json:"scanner_detection"`        // enable scanner detection
 	MultipartProtect       bool `json:"multipart_protect"`        // enable multipart protection
 	RceProtect             bool `json:"rce_protect"`              // enable remote code execution protect
