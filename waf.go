@@ -138,12 +138,13 @@ func createWaf(conf Config, kong *pdk.PDK) (coraza.WAF, error) {
 
 func processRequest(tx types.Transaction, kong *pdk.PDK) (*types.Interruption, error) {
 
-	realIp, err := kong.Request.GetHeader("X-Forwarded-For")
+	realIp, err := kong.Request.GetHeader("x-forwarded-for")
 	clientPort, _ := kong.Client.GetPort()
-	if err != nil || realIp != "" {
+	if err != nil || realIp == "" {
 		client, _ := kong.Client.GetIp()
 		tx.ProcessConnection(client, clientPort, "", 0)
 	} else {
+		kong.Log.Info(fmt.Printf("Client ip address: %s", realIp))
 		tx.ProcessConnection(realIp, clientPort, "", 0)
 	}
 
