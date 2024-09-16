@@ -98,7 +98,7 @@ func (conf Config) Access(kong *pdk.PDK) {
 	if interruption != nil {
 		interruptionType := interruption.Action
 		interruptionId := interruption.RuleID
-		response := fmt.Sprintf("Request terminated by Kong WAF - Action: %s - RuleId: %d - TransactionId: %s", interruptionType, interruptionId, transactionId)
+		response := fmt.Sprintf("Request terminated by WAF - Action: %s - RuleId: %d - TransactionId: %s", interruptionType, interruptionId, transactionId)
 		kong.Response.Exit(403, []byte(response), nil)
 	}
 
