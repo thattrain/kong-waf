@@ -7,7 +7,6 @@ import (
 	"github.com/Kong/go-pdk/server"
 	"github.com/corazawaf/coraza/v3"
 	"log"
-	"sync"
 )
 
 // region variables
@@ -15,7 +14,8 @@ import (
 //go:embed coraza.conf crs-setup.conf rules
 var embedFS embed.FS
 var wafMap = make(map[Config]coraza.WAF)
-var wafLock sync.Mutex
+
+//var wafLock sync.Mutex
 
 const (
 	PluginName = "Kong WAF"
@@ -60,8 +60,8 @@ func main() {
 }
 
 func (conf Config) Access(kong *pdk.PDK) {
-	wafLock.Lock()
-	defer wafLock.Unlock()
+	//wafLock.Lock()
+	//defer wafLock.Unlock()
 
 	// get waf instance base on Config struct
 	_, exist := wafMap[conf]
