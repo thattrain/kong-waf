@@ -11,6 +11,8 @@ FROM kong:3.8.0-ubuntu
 
 USER root
 RUN mkdir -p /opt/logs/plugins/kong-waf &&  \
+    mkdir -p /opt/logs/access/ && \
+    mkdir -p /opt/logs/error/ && \
     chown -R kong:kong /opt/logs/
 COPY --from=plugin-builder /go-plugins/kong-waf/kong-waf /usr/local/bin/kong-waf
 
