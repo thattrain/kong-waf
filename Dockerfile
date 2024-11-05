@@ -13,8 +13,8 @@ USER root
 RUN mkdir -p /opt/logs/plugins/kong-waf &&  \
     mkdir -p /opt/logs/access/ && \
     mkdir -p /opt/logs/error/ && \
-    chown -R kong:kong /opt/logs/ && \\
-    touch opt/logs/access/proxy.log opt/logs/access/admin.log opt/logs/access/admin-gui.log opt/logs/access/portal-api.log opt/logs/access/status.log opt/logs/access/proxy-stream.log && \\
+    chown -R kong:kong /opt/logs/ && \
+    touch opt/logs/access/proxy.log opt/logs/access/admin.log opt/logs/access/admin-gui.log opt/logs/access/portal-api.log opt/logs/access/status.log opt/logs/access/proxy-stream.log && \
     touch opt/logs/error/proxy.log opt/logs/error/admin.log opt/logs/error/admin-gui.log opt/logs/error/portal-api.log opt/logs/error/status.log opt/logs/error/proxy-stream.log
 COPY --from=plugin-builder /go-plugins/kong-waf/kong-waf /usr/local/bin/kong-waf
 
