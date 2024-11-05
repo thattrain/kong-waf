@@ -14,7 +14,7 @@ RUN mkdir -p /opt/logs/plugins/kong-waf &&  \
     touch opt/logs/access.log && \
     touch opt/logs/error.log && \
     touch opt/logs/admin_access.log && \
-    chown -R kong:kong /opt/logs/ &&
+    chown -R kong:kong /opt/logs/
 
 
 COPY --from=plugin-builder /go-plugins/kong-waf/kong-waf /usr/local/bin/kong-waf
