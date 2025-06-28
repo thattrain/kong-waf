@@ -7,7 +7,7 @@ RUN cd /go-plugins/kong-waf/ && \
     go build
 
 
-FROM kong:3.8.0-ubuntu
+FROM kong:3.9.1-ubuntu
 
 USER root
 RUN mkdir -p /opt/logs/plugins/kong-waf &&  \
